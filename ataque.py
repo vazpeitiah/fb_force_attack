@@ -1,56 +1,42 @@
 import numpy as np
-import sympy as sym
+import sympy as sympy
+import math
+from scipy.interpolate import lagrange
 from itertools import combinations
 
-def readVault(textFile): # lee el vault capturado en un archivo de texto
-  vault = []
-  with open(textFile) as file:
-    vault = [tuple(map(int, line.split(', '))) for line in file]
-  return vault
+import hashlib as hashlib
 
-def interpolation(xi, fi): # Polinomio de Lagrange
-  xi = np.array(xi)
-  fi = np.array(fi)
+xiF = [20891, 20339, 4898, 59059, 59266, 39479, 18047, 9855, 29507]
+fiF = [49661, 64551, 13405, 18972, 6786, 63594, 1284, 59927, 18676]
+hF = hashlib.sha256(lagrange(xiF, fiF).__str__().encode('utf-8')).hexdigest()
 
-  n = len(xi)
-  x = sym.Symbol('x')
-  polinomio = 0
-  divisorL = np.zeros(n, dtype = float)
-  for i in range(0,n,1):
-      # Termino de Lagrange
-      numerador = 1
-      denominador = 1
-      for j  in range(0,n,1):
-          if (j!=i):
-              numerador = numerador*(x-xi[j])
-              denominador = denominador*(xi[i]-xi[j])
-      terminoLi = numerador/denominador
+def readVault(textFile):  # lee el vault capturado en un archivo de texto
+    vault = []
+    with open(textFile) as file:
+        vault = [tuple(map(int, line.split(' '))) for line in file]
+    return vault
 
-      polinomio = polinomio + terminoLi*fi[i]
-      divisorL[i] = denominador
+r = readVault("vault/vault.txt")
 
-  # simplifica el polinomio
-  polisimple = polinomio.expand()
+print("Iniciando ataque de fuerza bruta")
 
-  print('Polinomio de Lagrange: ')
-  print(polisimple)
+for k in range(2, 9): # calcula el polinomio de lagrange con k puntos tomados del vault
+    print("Probando combinaciones para k=", k)
 
-r = readVault("vault.txt") # total de puntos de la boveda
-# k = grado del polinomio
-# t = posibles puntos genuinos
-for k in range(2, len(r)): # calcula el polinomio de lagrange con k puntos tomados del vault
-  combinationsOfK = combinations(r, k)
-
-  xi = []
-  fi = []
-  for subset in combinationsOfK:
-    for t in subset:
-      aux = list(t)
-      xi.append(aux[0])
-      fi.append(aux[1])
-    print("xi = ", xi)
-    print("fi = ", fi) 
-    interpolation(xi, fi)
-    xi.clear()
-    fi.clear()
-    #break
+    combinationsOfK = combinations(r, k + 1)
+    for subset in combinationsOfK:
+        xi = []
+        fi = []
+        for t in subset:
+            aux = list(t)
+            xi.append(aux[0])
+            fi.append(aux[1])
+        fa = lagrange(xi, fi)
+        hfa = hashlib.sha256(fa.__str__().encode('utf-8')).hexdigest()
+        # print(fa)
+        if (np.array_equal(xi,xiF) and np.array_equal(fi,fiF)):
+            print("Ok")
+        if(hfa == hF):
+            print("Se encontro el polinomio correcto:")
+            print(fa)
+            break
