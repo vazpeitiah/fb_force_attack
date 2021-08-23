@@ -20,12 +20,12 @@ yG = [49661, 64551, 13405, 18972, 6786, 63594, 1284, 59927, 18676] # Puntos genu
 F = lagrange_poly_iter(xG, yG, N+1, N+1) # Coeficientes del polinomio origianl
 hF = hashlib.sha256(F.__str__().encode('utf-8')).hexdigest() # valor hash del polinomio original (Este valor es conocido por el atacante)
 
-r = readVault("vault/vault.txt")
+r = readVault("vault/Vault.txt")
 #print(F)
-#print("Iniciando ataque de fuerza bruta")
+print("Iniciando ataque de fuerza bruta")
 
-for k in range(8, 9): # calcula el polinomio de lagrange con k + 1 puntos tomados del vault con k = 2, 3, 4, 5, 6, 7, 8
-    #print("Probando combinaciones para k=", k)
+for k in range(2, 9): # calcula el polinomio de lagrange con k + 1 puntos tomados del vault con k = 2, 3, 4, 5, 6, 7, 8
+    print("Probando combinaciones para k=", k)
 
     kCombinations = itertools.combinations(r, k + 1)
     for subset in kCombinations:
